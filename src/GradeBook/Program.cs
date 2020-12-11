@@ -7,14 +7,9 @@ namespace GradeBook
     {
         static void Main(string[] args)
         {
-            if(args.Length > 0)
-            {
-                Console.WriteLine($"Hello, {args[0]}!");
-            }
-            else
-            {
-                Console.WriteLine("Hello!");
-            }
+            var book = new Book();
+            book.AddGrade(89.1);
+
             var grades = new List<double>{12.3,34.5,56.74,78.9};
             grades.Add(56.1);
             double result = 0.0;
