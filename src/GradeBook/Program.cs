@@ -7,6 +7,8 @@ namespace GradeBook
         static void Main(string[] args)
         {
             var book = new Book("Dan's Gradebook");
+            book.GradeAdded += OnGradeAdded;
+
             System.Console.WriteLine("Welcome to the Gradebook!");
             var done = false;
             do{
@@ -43,6 +45,11 @@ namespace GradeBook
             Console.WriteLine($"The lowest grade is {stats.Low}");
             Console.WriteLine($"The highest grade is {stats.High}");
             Console.WriteLine($"The average grade is {stats.Average:N1}");
-        }
+         }
+
+         static void OnGradeAdded(object sender, EventArgs e)
+         {
+             Console.WriteLine("A Grade Was Added.");
+         }
     }
 }
