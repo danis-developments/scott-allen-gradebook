@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace GradeBook
 {
@@ -33,16 +34,57 @@ namespace GradeBook
         {
         }
 
-        public virtual event GradeAddedDelegate GradeAdded;
+        public abstract event GradeAddedDelegate GradeAdded;
 
         public abstract void AddGrade(double grade);
 
-        public virtual Statistics GetStatistics()
-        {
-            throw new NotImplementedException();
-        }
+        public abstract Statistics GetStatistics();
     }
 
+    public class DiskBook : Book
+    {
+        public DiskBook(string name) : base(name)
+        {
+
+        }
+
+        public override event GradeAddedDelegate GradeAdded;
+
+        public override void AddGrade(double grade)
+        {
+            using(var bookFile = File.AppendText($"{Name}.txt"))
+            {
+                bookFile.WriteLine(grade);
+                if(GradeAdded != null)
+                {
+                    GradeAdded(this, new EventArgs());
+                }
+                
+            }
+        }
+
+        public override Statistics GetStatistics()
+        {
+            var result = new Statistics();
+            using(var bookFile = File.OpenText($"{Name}.txt"))
+            {
+                while(true)
+                {
+                    var line =  bookFile.ReadLine();
+                    if(line == null)
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        var grade = double.Parse(line);
+                        result.AddNum(grade);
+                    }
+                }
+                return result;
+            }
+        }
+    }
     public class InMemoryBook : Book
     {
         public InMemoryBook(string name) : base(name)
@@ -101,48 +143,10 @@ namespace GradeBook
         {
 
             var result = new Statistics();
-            result.Average = 0.0;
-            result.High = double.MinValue;
-            result.Low = double.MaxValue;
             
             foreach(var grade in grades)
             {
-                result.High = Math.Max(grade, result.High);
-                result.Low = Math.Min(grade, result.Low);
-                result.Average += grade;
-            }
-
-            if(grades.Count == 0)
-            {
-                result.High = 0.0;
-                result.Low = 0.0;
-            }
-            else
-            {
-                result.Average /= grades.Count;
-            }
-
-            switch(result.Average)
-            {
-                case var d when d >= 90.0:
-                    result.LetterGrade = 'A';
-                    break;
-                
-                case var d when d >= 80.0:
-                    result.LetterGrade = 'B';
-                    break;
-                
-                case var d when d >= 70.0:
-                    result.LetterGrade = 'C';
-                    break;
-                
-                case var d when d >= 60.0:
-                    result.LetterGrade = 'D';
-                    break;
-                
-                default:
-                    result.LetterGrade = 'F';
-                    break;
+                result.AddNum(grade);
             }
             return result;
         }
